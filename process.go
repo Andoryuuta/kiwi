@@ -1,19 +1,19 @@
 package kiwi
 
-//TODO: switch from 
+//TODO: switch from
 //github.com/Andoryuuta/w32 to github.com/VividCortex/w32 if pull request is accepted.
 import (
+	"errors"
+	"fmt"
 	"github.com/Andoryuuta/w32"
 	"path/filepath"
-	"unsafe"
-	"errors"
 	"reflect"
-	"fmt"
+	"unsafe"
 )
 
-type Process struct{
+type Process struct {
 	Handle w32.HANDLE
-	PID uint32
+	PID    uint32
 }
 
 const (
@@ -21,48 +21,48 @@ const (
 )
 
 //getFileNameByPID returns a file name given a PID.
-func getFileNameByPID(pid uint32) string{
+func getFileNameByPID(pid uint32) string {
 	var fileName string = `<Unknown File>`
 
 	//Open process
 	hnd, ok := w32.OpenProcess(w32.PROCESS_QUERY_INFORMATION, false, pid)
-	if !ok{
+	if !ok {
 		return fileName
 	}
 	defer w32.CloseHandle(hnd)
 
 	//Get file path
 	path, ok := w32.GetProcessImageFileName(hnd)
-	if !ok{
+	if !ok {
 		return fileName
 	}
-	
+
 	//Split file path to get file name
 	_, fileName = filepath.Split(path)
 	return fileName
 }
 
-func GetProcessByFileName(fileName string) (Process, error){
+func GetProcessByFileName(fileName string) (Process, error) {
 	//Read in process ids
 	PIDs := make([]uint32, 1024)
 	var bytesRead uint32 = 0
 	ok := w32.EnumProcesses(PIDs, uint32(len(PIDs)), &bytesRead)
-	if !ok{
+	if !ok {
 		panic("Error Enumerating processes.")
 	}
 
 	//Loop over pids,
 	//Divide bytesRead by sizeof(uint32) to get how many processes there are.
-	for i:=uint32(0); i < (bytesRead / 4); i++{
+	for i := uint32(0); i < (bytesRead / 4); i++ {
 		//Make sure to skip over the system process with PID 0
-		if PIDs[i] == 0{
+		if PIDs[i] == 0 {
 			continue
 		}
-		
+
 		//Check if its the process
-		if getFileNameByPID(PIDs[i]) == fileName{
+		if getFileNameByPID(PIDs[i]) == fileName {
 			hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, PIDs[i])
-			if !ok{
+			if !ok {
 				return Process{}, errors.New(fmt.Sprintf("Error while opening process %d", PIDs[i]))
 			}
 			return Process{hnd, PIDs[i]}, nil
@@ -72,8 +72,6 @@ func GetProcessByFileName(fileName string) (Process, error){
 	//Couldn't find process, return an error
 	return Process{}, errors.New("Couldn't find process with name " + fileName)
 }
-
-
 
 func (p *Process) ReadInt8(addr uintptr) (v int8, e error)       { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadInt16(addr uintptr) (v int16, e error)     { e = p.read(addr, &v); return v, e }
@@ -120,10 +118,10 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	i := reflect.Indirect(v)
 	size := i.Type().Size()
 	bytesWritten, ok := w32.WriteProcessMemory(
-			p.Handle,
-			unsafe.Pointer(addr),
-			unsafe.Pointer(i.UnsafeAddr()),
-			size,
+		p.Handle,
+		unsafe.Pointer(addr),
+		unsafe.Pointer(i.UnsafeAddr()),
+		size,
 	)
 	if !ok || bytesWritten != size {
 		return errors.New("Error on writing process memory.")
