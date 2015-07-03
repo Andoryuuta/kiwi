@@ -42,7 +42,11 @@ func main(){
 	}
 }
 ```
-## _Future_ feature ideas
+## Current Features
+* Finding process given executable file name
+* Reading and Writing with support for [uint & int 8, 16, 32, 64] [float 32, 64] data types
+
+## _Future_ plans
 * Pattern scanning for bytecode
 * Call remote functions via injected assembly
 * Hooking functions via injected assembly
