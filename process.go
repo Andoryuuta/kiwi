@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"unsafe"
+	"syscall"
 )
 
 type Process struct {
@@ -73,6 +74,40 @@ func GetProcessByFileName(fileName string) (Process, error) {
 	return Process{}, errors.New("Couldn't find process with name " + fileName)
 }
 
+
+// Taken from genkman's gist(https://gist.github.com/henkman/3083408)
+func (p *Process) GetModuleBase(moduleName string) (uintptr, error){
+	snap := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32 | w32.TH32CS_SNAPALL | w32.TH32CS_SNAPMODULE , p.PID)
+	if snap == 0 {
+		return 0, errors.New("snapshot could not be created")
+	}
+	defer w32.CloseHandle(snap)
+	
+	var me32 w32.MODULEENTRY32
+	me32.Size = uint32(unsafe.Sizeof(me32))
+	
+	// Get first module
+	if !w32.Module32First(snap, &me32) {
+		return 0, errors.New("module information retrieval failed")
+	}
+	
+	// Check first module
+	if syscall.UTF16ToString(me32.SzModule[:]) == moduleName{
+		return uintptr(unsafe.Pointer(me32.ModBaseAddr)), nil
+	}
+	
+	// Loop all modules remaining
+	for w32.Module32Next(snap, &me32) {
+		//Check this module
+		if syscall.UTF16ToString(me32.SzModule[:]) == moduleName{
+			return uintptr(unsafe.Pointer(me32.ModBaseAddr)), nil
+		}
+	}
+	
+	return 0, errors.New("Couldn't Find Module!!")
+}
+
+
 func (p *Process) ReadInt8(addr uintptr) (v int8, e error)       { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadInt16(addr uintptr) (v int16, e error)     { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadInt32(addr uintptr) (v int32, e error)     { e = p.read(addr, &v); return v, e }
@@ -108,7 +143,6 @@ func (p *Process) ReadUint32Ptr(addr uintptr, offsets ...uintptr) (uint32, error
     }
 	
 	for _, offset := range offsets{
-		fmt.Printf("Adding offset % X\n", offset)
 		curPtr, err = p.ReadUint32(uintptr(curPtr)+offset)
 		if err != nil{
 			return 0, errors.New("Error while trying to read from offset.")
