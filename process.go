@@ -17,7 +17,7 @@ type Process struct {
 }
 
 const (
-	PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
+	PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION | w32.PROCESS_CREATE_THREAD
 )
 
 //getFileNameByPID returns a file name given a PID.
@@ -99,6 +99,23 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 		return errors.New("Error on reading process memory.")
 	}
 	return nil
+}
+
+func (p *Process) ReadUint32Ptr(addr uintptr, offsets ...uintptr) (uint32, error) {
+	curPtr, err := p.ReadUint32(addr)
+	if err != nil{
+        return 0, errors.New("Error while trying to read from ptr base.")
+    }
+	
+	for _, offset := range offsets{
+		fmt.Printf("Adding offset % X\n", offset)
+		curPtr, err = p.ReadUint32(uintptr(curPtr)+offset)
+		if err != nil{
+			return 0, errors.New("Error while trying to read from offset.")
+		}
+	}
+	
+	return curPtr, nil
 }
 
 func (p *Process) WriteInt8(addr uintptr, v int8) (e error)       { return p.write(addr, &v) }
