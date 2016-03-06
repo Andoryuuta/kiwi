@@ -77,25 +77,27 @@ func GetProcessByFileName(fileName string) (Process, error) {
 
 // The platform specific read function.
 func (p *Process) read(addr uintptr, ptr interface{}) error {
+	// Reflection magic!
 	v := reflect.ValueOf(ptr)
 	i := reflect.Indirect(v)
 	size := i.Type().Size()
 
+	// Open the file mapped process memory
 	mem, err := os.Open(fmt.Sprintf("/proc/%d/mem", p.PID))
 	if err != nil {
-		// TODO: Return proper error
-		panic(err)
+		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
 	}
 
 	// Create a buffer and read data into it
 	dataBuf := make([]byte, size)
 	n, err := mem.ReadAt(dataBuf, int64(addr))
 	if n != int(size) {
-		panic(fmt.Sprintf("Tried to read %d bytes, actually read %d bytes\n", size, n))
+		return errors.New(fmt.Sprintf("Tried to read %d bytes, actually read %d bytes\n", size, n))
 	} else if err != nil {
-		panic(err)
+		return err
 	}
 
+	// Unsafe cast to []byte to copy data into
 	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: i.UnsafeAddr(),
 		Len:  int(size),
@@ -103,14 +105,36 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	}))
 	copy(*buf, dataBuf)
 
-	fmt.Println(buf)
-	fmt.Println(dataBuf)
-
 	return nil
 }
 
 // The platform specific write function.
 func (p *Process) write(addr uintptr, ptr interface{}) error {
-	panic("Not implemented")
+	// Reflection magic!
+	v := reflect.ValueOf(ptr)
+	i := reflect.Indirect(v)
+	size := i.Type().Size()
+
+	// Open the file mapped process memory
+	mem, err := os.OpenFile(fmt.Sprintf("/proc/%d/mem", p.PID), os.O_WRONLY, 0666)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
+	}
+
+	// Unsafe cast to []byte to copy data from
+	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: i.UnsafeAddr(),
+		Len:  int(size),
+		Cap:  int(size),
+	}))
+
+	// Write the data from buf into memory
+	n, err := mem.WriteAt(*buf, int64(addr))
+	if n != int(size) {
+		return errors.New((fmt.Sprintf("Tried to write %d bytes, actually wrote %d bytes\n", size, n)))
+	} else if err != nil {
+		return err
+	}
+
 	return nil
 }
