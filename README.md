@@ -45,6 +45,7 @@ func main(){
 ## Current Features
 * Finding process given executable file name
 * Reading and Writing with support for [uint & int 8, 16, 32, 64] [float 32, 64] data types
+* Support for Windows and Linux(assuming /proc/ directory exists.) 
 
 ## _Future_ plans
 * Pattern scanning for bytecode
