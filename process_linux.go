@@ -64,8 +64,6 @@ func GetProcessByFileName(fileName string) (Process, error) {
 		// Stat file [1] has the file name surrounded by ()
 		curProcFileName := strings.Trim(strings.Split(string(tmpFileBytes), " ")[1], "()")
 
-		//fmt.Printf("Pid: %d\tFile Name:%s\n", pid, curProcFileName)
-
 		// Check if this is the process we are looking for.
 		if curProcFileName == fileName {
 			return Process{PID: pid}, nil

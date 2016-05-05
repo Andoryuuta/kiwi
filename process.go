@@ -23,7 +23,6 @@ func (p *Process) ReadUint64(addr uintptr) (v uint64, e error)   { e = p.read(ad
 func (p *Process) ReadFloat32(addr uintptr) (v float32, e error) { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadFloat64(addr uintptr) (v float64, e error) { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadUintptr(addr uintptr) (v uintptr, e error) { e = p.read(addr, &v); return v, e }
-
 func (p *Process) ReadUint32Ptr(addr uintptr, offsets ...uintptr) (uint32, error) {
 	curPtr, err := p.ReadUint32(addr)
 	if err != nil {
