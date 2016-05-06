@@ -1,14 +1,12 @@
 package kiwi
 
-// TODO: switch from
-// github.com/Andoryuuta/w32 to github.com/VividCortex/w32 if pull request is accepted.
-
 import (
 	"errors"
 	"fmt"
 	"github.com/Andoryuuta/w32"
 	"path/filepath"
 	"reflect"
+	"syscall"
 	"unsafe"
 )
 
@@ -69,7 +67,7 @@ func GetProcessByFileName(fileName string) (Process, error) {
 			if !ok {
 				return Process{}, errors.New(fmt.Sprintf("Error while opening process %d", PIDs[i]))
 			}
-			return Process{hnd, PIDs[i]}, nil
+			return Process{ProcPlatAttribs: ProcPlatAttribs{Handle: hnd}, PID: uint64(PIDs[i])}, nil
 		}
 	}
 
@@ -77,9 +75,13 @@ func GetProcessByFileName(fileName string) (Process, error) {
 	return Process{}, errors.New("Couldn't find process with name " + fileName)
 }
 
-// Taken from genkman's gist(https://gist.github.com/henkman/3083408)
+// GetModuleBase takes a module name as an argument. (e.g. "kernel32.dll")
+// Returns the modules base address.
+//
+// (Mostly taken from genkman's gist: https://gist.github.com/henkman/3083408)
+// TODO(Andoryuuta): Figure out possible licencing issues with this, or rewrite.
 func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
-	snap := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32|w32.TH32CS_SNAPALL|w32.TH32CS_SNAPMODULE, p.PID)
+	snap := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32|w32.TH32CS_SNAPALL|w32.TH32CS_SNAPMODULE, uint32(p.PID))
 	if snap == 0 {
 		return 0, errors.New("Error trying on create toolhelp32 snapshot.")
 	}
