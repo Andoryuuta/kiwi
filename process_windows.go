@@ -3,7 +3,7 @@ package kiwi
 import (
 	"errors"
 	"fmt"
-	"github.com/Andoryuuta/w32"
+	"github.com/Andoryuuta/kiwi/w32"
 	"path/filepath"
 	"reflect"
 	"syscall"
@@ -81,14 +81,14 @@ func GetProcessByFileName(fileName string) (Process, error) {
 // (Mostly taken from genkman's gist: https://gist.github.com/henkman/3083408)
 // TODO(Andoryuuta): Figure out possible licencing issues with this, or rewrite.
 func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
-	snap := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32|w32.TH32CS_SNAPALL|w32.TH32CS_SNAPMODULE, uint32(p.PID))
-	if snap == 0 {
+	snap, ok := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32|w32.TH32CS_SNAPALL|w32.TH32CS_SNAPMODULE, uint32(p.PID))
+	if !ok {
 		return 0, errors.New("Error trying on create toolhelp32 snapshot.")
 	}
 	defer w32.CloseHandle(snap)
 
 	var me32 w32.MODULEENTRY32
-	me32.Size = uint32(unsafe.Sizeof(me32))
+	me32.DwSize = uint32(unsafe.Sizeof(me32))
 
 	// Get first module
 	if !w32.Module32First(snap, &me32) {
