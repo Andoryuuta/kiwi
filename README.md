@@ -51,7 +51,6 @@ func main(){
 * Pattern scanning for bytecode
 * Call remote functions via injected assembly
 * Hooking functions via injected assembly
-* Possible *Nix support via ptrace's peek and poke
 * Setting breakpoints via windows debugging api
 * Mono runtime features (if hooking and remote functions are possible)
 
