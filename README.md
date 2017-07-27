@@ -1,6 +1,18 @@
 # Kiwi
+[![GoDoc](https://godoc.org/github.com/Andoryuuta/kiwi?status.svg)](https://godoc.org/github.com/Andoryuuta/kiwi)
+
 A package for memory editing in go.
 
+## Current Features
+* Reading and Writing with support for [uint & int 8, 16, 32, 64] [float 32, 64] data types
+* Support for Windows and Linux(assuming /proc/ directory exists.) 
+
+## _Future_ plans
+* Pattern scanning for bytecode
+* Call remote functions via injected assembly
+* Hooking functions via injected assembly
+* Setting breakpoints via windows debugging api
+* Mono runtime features (if hooking and remote functions are possible)
 
 ## Installation
 `go get github.com/Andoryuuta/kiwi`
@@ -41,16 +53,6 @@ func main() {
 	}
 }
 ```
-## Current Features
-* Finding process given executable file name
-* Reading and Writing with support for [uint & int 8, 16, 32, 64] [float 32, 64] data types
-* Support for Windows and Linux(assuming /proc/ directory exists.) 
 
-## _Future_ plans
-* Pattern scanning for bytecode
-* Call remote functions via injected assembly
-* Hooking functions via injected assembly
-* Setting breakpoints via windows debugging api
-* Mono runtime features (if hooking and remote functions are possible)
 
 
