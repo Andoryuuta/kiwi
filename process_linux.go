@@ -12,7 +12,7 @@ import (
 	"unsafe"
 )
 
-// Platform specific fields to be embeded into
+// Platform specific fields to be embedded into
 // the Process struct.
 type ProcPlatAttribs struct {
 }
@@ -28,21 +28,21 @@ func GetProcessByFileName(fileName string) (Process, error) {
 		return Process{}, errors.New("Error on opening /proc")
 	}
 
-	// Read in the directory names, processes are listed
-	// as folders here, named their PID's.
+	// Read in the directory names. Processes are listed
+	// as folders within this directory, named by their PID.
 	dirNames, err := procDir.Readdirnames(0)
 	if err != nil {
 		fmt.Println(err)
 		return Process{}, errors.New("Error on reading dirs from /proc")
 	}
 
-	// Enumerate all directories here
+	// Enumerate all directories here.
 	for _, dirString := range dirNames {
 
-		// Parse the directory name as a uint
+		// Parse the directory name as a uint.
 		pid, err := strconv.ParseUint(dirString, 0, 64)
 
-		// If it is not a numeric dir name, skip it.
+		// If it is not a numeric directory name, skip it.
 		if v, ok := err.(*strconv.NumError); ok && v.Err == strconv.ErrSyntax {
 			continue
 		} else if err != nil {
@@ -50,10 +50,9 @@ func GetProcessByFileName(fileName string) (Process, error) {
 			return Process{}, errors.New("Error on enumerating dirs from /proc")
 		}
 
-		// TODO: Change this to something better,
-		// it is very hacky right now.
+		// TODO: Change this to something better, it is very hacky right now.
 
-		// Read the target program's stats file
+		// Read the target program's stats file.
 		tmpFileBytes, err := ioutil.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
 		if err != nil {
 			fmt.Println(err)
@@ -80,13 +79,13 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	i := reflect.Indirect(v)
 	size := i.Type().Size()
 
-	// Open the file mapped process memory
+	// Open the file mapped process memory.
 	mem, err := os.Open(fmt.Sprintf("/proc/%d/mem", p.PID))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
 	}
 
-	// Create a buffer and read data into it
+	// Create a buffer and read data into it.
 	dataBuf := make([]byte, size)
 	n, err := mem.ReadAt(dataBuf, int64(addr))
 	if n != int(size) {
@@ -95,7 +94,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 		return err
 	}
 
-	// Unsafe cast to []byte to copy data into
+	// Unsafely cast to []byte to copy data into.
 	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: i.UnsafeAddr(),
 		Len:  int(size),
@@ -113,20 +112,20 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	i := reflect.Indirect(v)
 	size := i.Type().Size()
 
-	// Open the file mapped process memory
+	// Open the file mapped process memory.
 	mem, err := os.OpenFile(fmt.Sprintf("/proc/%d/mem", p.PID), os.O_WRONLY, 0666)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
 	}
 
-	// Unsafe cast to []byte to copy data from
+	// Unsafe cast to []byte to copy data from.
 	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
 		Data: i.UnsafeAddr(),
 		Len:  int(size),
 		Cap:  int(size),
 	}))
 
-	// Write the data from buf into memory
+	// Write the data from buf into memory.
 	n, err := mem.WriteAt(*buf, int64(addr))
 	if n != int(size) {
 		return errors.New((fmt.Sprintf("Tried to write %d bytes, actually wrote %d bytes\n", size, n)))

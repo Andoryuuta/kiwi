@@ -8,7 +8,7 @@ import (
 	_ "unsafe"
 )
 
-// Platform specific fields to be embeded into
+// Platform specific fields to be embedded into
 // the Process struct.
 type ProcPlatAttribs struct {
 }

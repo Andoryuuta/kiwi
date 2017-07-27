@@ -5,7 +5,7 @@ import (
 )
 
 type Process struct {
-	// Embeded struct for platform specific fields
+	// Embedded struct for platform specific fields
 	ProcPlatAttribs
 
 	// Platform independent process details

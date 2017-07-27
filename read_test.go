@@ -2,11 +2,12 @@ package kiwi
 
 import (
 	"fmt"
-	"github.com/kardianos/osext"
 	"os"
 	"path/filepath"
 	"testing"
 	"unsafe"
+
+	"github.com/kardianos/osext"
 )
 
 // The currently running process's name,
@@ -14,19 +15,19 @@ import (
 var currentProcessName string
 
 func TestMain(m *testing.M) {
-	// Get curent executable name
+	// Get current executable name.
 	fn, err := osext.Executable()
 	if err != nil {
 		panic(fmt.Sprintf("Error trying to get executable name. Error: %s\n", err.Error()))
 	}
 	currentProcessName = filepath.Base(fn)
 
-	// Run tests and exit
+	// Run tests and exit.
 	os.Exit(m.Run())
 }
 
 func TestGetProcessByFileName(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	_, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -34,7 +35,7 @@ func TestGetProcessByFileName(t *testing.T) {
 }
 
 func TestReadUint8(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -50,12 +51,12 @@ func TestReadUint8(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadUint16(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -71,12 +72,12 @@ func TestReadUint16(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadUint32(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -92,12 +93,12 @@ func TestReadUint32(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadUint64(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -113,12 +114,12 @@ func TestReadUint64(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadInt8(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -134,12 +135,12 @@ func TestReadInt8(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadInt16(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -155,12 +156,12 @@ func TestReadInt16(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadInt32(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -176,12 +177,12 @@ func TestReadInt32(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadInt64(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -197,12 +198,12 @@ func TestReadInt64(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadFloat32(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -218,12 +219,12 @@ func TestReadFloat32(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadFloat64(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -239,12 +240,12 @@ func TestReadFloat64(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
 
 func TestReadUintptr(t *testing.T) {
-	// Get process using kiwi
+	// Get process using kiwi.
 	p, err := GetProcessByFileName(currentProcessName)
 	if err != nil {
 		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
@@ -260,6 +261,6 @@ func TestReadUintptr(t *testing.T) {
 	}
 
 	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Orginial: %v, Read: %v\n", org_var, read_var)
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }

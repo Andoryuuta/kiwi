@@ -3,40 +3,41 @@ package kiwi
 import (
 	"errors"
 	"fmt"
-	"github.com/Andoryuuta/kiwi/w32"
 	"path/filepath"
 	"reflect"
 	"syscall"
 	"unsafe"
+
+	"github.com/Andoryuuta/kiwi/w32"
 )
 
-// Platform specific fields to be embeded into
+// Platform specific fields to be embedded into
 // the Process struct.
 type ProcPlatAttribs struct {
 	Handle w32.HANDLE
 }
 
-// Constant for full process access
+// Constant for full process access.
 const PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
 
-//getFileNameByPID returns a file name given a PID.
+// getFileNameByPID returns a file name given a PID.
 func getFileNameByPID(pid uint32) string {
 	var fileName string = `<Unknown File>`
 
-	//Open process
+	// Open process.
 	hnd, ok := w32.OpenProcess(w32.PROCESS_QUERY_INFORMATION, false, pid)
 	if !ok {
 		return fileName
 	}
 	defer w32.CloseHandle(hnd)
 
-	//Get file path
+	// Get file path.
 	path, ok := w32.GetProcessImageFileName(hnd)
 	if !ok {
 		return fileName
 	}
 
-	//Split file path to get file name
+	// Split file path to get file name.
 	_, fileName = filepath.Split(path)
 	return fileName
 }
@@ -53,15 +54,15 @@ func GetProcessByFileName(fileName string) (Process, error) {
 		panic("Error Enumerating processes.")
 	}
 
-	// Loop over pids,
+	// Loop over PIDs,
 	// Divide bytesRead by sizeof(uint32) to get how many processes there are.
 	for i := uint32(0); i < (bytesRead / 4); i++ {
-		// Make sure to skip over the system process with PID 0
+		// Skip over the system process with PID 0.
 		if PIDs[i] == 0 {
 			continue
 		}
 
-		// Check if its the process
+		// Check if it is the process being searched for.
 		if getFileNameByPID(PIDs[i]) == fileName {
 			hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, PIDs[i])
 			if !ok {
@@ -71,7 +72,7 @@ func GetProcessByFileName(fileName string) (Process, error) {
 		}
 	}
 
-	// Couldn't find process, return an error
+	// Couldn't find process, return an error.
 	return Process{}, errors.New("Couldn't find process with name " + fileName)
 }
 
@@ -90,29 +91,29 @@ func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
 	var me32 w32.MODULEENTRY32
 	me32.DwSize = uint32(unsafe.Sizeof(me32))
 
-	// Get first module
+	// Get first module.
 	if !w32.Module32First(snap, &me32) {
 		return 0, errors.New("Error trying to get first module.")
 	}
 
-	// Check first module
+	// Check first module.
 	if syscall.UTF16ToString(me32.SzModule[:]) == moduleName {
 		return uintptr(unsafe.Pointer(me32.ModBaseAddr)), nil
 	}
 
-	// Loop all modules remaining
+	// Loop all modules remaining.
 	for w32.Module32Next(snap, &me32) {
-		// Check this module
+		// Check this module.
 		if syscall.UTF16ToString(me32.SzModule[:]) == moduleName {
 			return uintptr(unsafe.Pointer(me32.ModBaseAddr)), nil
 		}
 	}
 
-	// If this is reached, then we couldn't find the module
-	return 0, errors.New("Couldn't Find Module.")
+	// Module couldn't be found.
+	return 0, errors.New("Couldn't find module.")
 }
 
-// The Windows specific read function.
+// The platform specific read function.
 func (p *Process) read(addr uintptr, ptr interface{}) error {
 	v := reflect.ValueOf(ptr)
 	i := reflect.Indirect(v)
@@ -129,7 +130,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	return nil
 }
 
-// The Windows specific write function.
+// The platform specific write function.
 func (p *Process) write(addr uintptr, ptr interface{}) error {
 	v := reflect.ValueOf(ptr)
 	i := reflect.Indirect(v)
