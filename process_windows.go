@@ -116,15 +116,15 @@ func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
 // The platform specific read function.
 func (p *Process) read(addr uintptr, ptr interface{}) error {
 	v := reflect.ValueOf(ptr)
-	i := reflect.Indirect(v)
-	size := i.Type().Size()
+	dataAddr := getDataAddr(v)
+	dataSize := getDataSize(v)
 	bytesRead, ok := w32.ReadProcessMemory(
 		p.Handle,
 		unsafe.Pointer(addr),
-		unsafe.Pointer(i.UnsafeAddr()),
-		size,
+		unsafe.Pointer(dataAddr),
+		dataSize,
 	)
-	if !ok || bytesRead != size {
+	if !ok || bytesRead != dataSize {
 		return errors.New("Error on reading process memory.")
 	}
 	return nil
@@ -133,15 +133,15 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 // The platform specific write function.
 func (p *Process) write(addr uintptr, ptr interface{}) error {
 	v := reflect.ValueOf(ptr)
-	i := reflect.Indirect(v)
-	size := i.Type().Size()
+	dataAddr := getDataAddr(v)
+	dataSize := getDataSize(v)
 	bytesWritten, ok := w32.WriteProcessMemory(
 		p.Handle,
 		unsafe.Pointer(addr),
-		unsafe.Pointer(i.UnsafeAddr()),
-		size,
+		unsafe.Pointer(dataAddr),
+		dataSize,
 	)
-	if !ok || bytesWritten != size {
+	if !ok || bytesWritten != dataSize {
 		return errors.New("Error on writing process memory.")
 	}
 	return nil

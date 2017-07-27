@@ -1,6 +1,7 @@
 package kiwi
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -240,6 +241,27 @@ func TestReadFloat64(t *testing.T) {
 	}
 
 	if read_var != org_var {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	}
+}
+
+func TestReadBytes(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	// In memory variable to read from.
+	var org_var []byte = []byte{5, 4, 3, 2, 1}
+
+	// Attempt to read using kiwi.
+	read_var, err := p.ReadBytes(uintptr(unsafe.Pointer(&org_var[0])), len(org_var))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if !bytes.Equal(read_var, org_var) {
 		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }

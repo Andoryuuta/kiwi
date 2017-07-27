@@ -76,8 +76,8 @@ func GetProcessByFileName(fileName string) (Process, error) {
 func (p *Process) read(addr uintptr, ptr interface{}) error {
 	// Reflection magic!
 	v := reflect.ValueOf(ptr)
-	i := reflect.Indirect(v)
-	size := i.Type().Size()
+	dataAddr := getDataAddr(v)
+	dataSize := getDataSize(v)
 
 	// Open the file mapped process memory.
 	mem, err := os.Open(fmt.Sprintf("/proc/%d/mem", p.PID))
@@ -86,9 +86,9 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	}
 
 	// Create a buffer and read data into it.
-	dataBuf := make([]byte, size)
+	dataBuf := make([]byte, dataSize)
 	n, err := mem.ReadAt(dataBuf, int64(addr))
-	if n != int(size) {
+	if n != int(dataSize) {
 		return errors.New(fmt.Sprintf("Tried to read %d bytes, actually read %d bytes\n", size, n))
 	} else if err != nil {
 		return err
@@ -96,9 +96,9 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 
 	// Unsafely cast to []byte to copy data into.
 	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
-		Data: i.UnsafeAddr(),
-		Len:  int(size),
-		Cap:  int(size),
+		Data: dataAddr,
+		Len:  int(dataSize),
+		Cap:  int(dataSize),
 	}))
 	copy(*buf, dataBuf)
 
@@ -109,8 +109,8 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 func (p *Process) write(addr uintptr, ptr interface{}) error {
 	// Reflection magic!
 	v := reflect.ValueOf(ptr)
-	i := reflect.Indirect(v)
-	size := i.Type().Size()
+	dataAddr := getDataAddr(v)
+	dataSize := getDataSize(v)
 
 	// Open the file mapped process memory.
 	mem, err := os.OpenFile(fmt.Sprintf("/proc/%d/mem", p.PID), os.O_WRONLY, 0666)
@@ -120,14 +120,14 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 
 	// Unsafe cast to []byte to copy data from.
 	buf := (*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
-		Data: i.UnsafeAddr(),
-		Len:  int(size),
-		Cap:  int(size),
+		Data: dataAddr,
+		Len:  int(dataSize),
+		Cap:  int(dataSize),
 	}))
 
 	// Write the data from buf into memory.
 	n, err := mem.WriteAt(*buf, int64(addr))
-	if n != int(size) {
+	if n != int(dataSize) {
 		return errors.New((fmt.Sprintf("Tried to write %d bytes, actually wrote %d bytes\n", size, n)))
 	} else if err != nil {
 		return err
