@@ -17,6 +17,17 @@ import (
 type ProcPlatAttribs struct {
 }
 
+// GetProcessByPID returns the process with the given PID.
+func GetProcessByPID(PID int) (Process, error) {
+	// Try to open the folder to see if it exists and if we have access to it.
+	_, err := os.Open(fmt.Sprintf("/proc/%d", PID))
+	if err != nil {
+		return Process{}, errors.New(fmt.Sprintf("Error opening /proc/%d", PID))
+	}
+
+	return Process{PID: uint64(PID)}, nil
+}
+
 // GetProcessByFileName returns the process with the given file name.
 // If multiple processes have the same filename, the first process
 // enumerated by this function is returned.

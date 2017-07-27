@@ -27,6 +27,15 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func TestGetProcessByPID(t *testing.T) {
+	// Get process using kiwi.
+	pid := os.Getpid()
+	_, err := GetProcessByPID(pid)
+	if err != nil {
+		t.Fatalf("Error trying to open process with PID %d, Error: %s\n", pid, err.Error())
+	}
+}
+
 func TestGetProcessByFileName(t *testing.T) {
 	// Get process using kiwi.
 	_, err := GetProcessByFileName(currentProcessName)

@@ -13,6 +13,12 @@ import (
 type ProcPlatAttribs struct {
 }
 
+// GetProcessByPID returns the process with the given PID.
+func GetProcessByPID(PID int) (Process, error) {
+	panic("OSX is not supported")
+	return Process{}, nil
+}
+
 // GetProcessByFileName returns the process with the given file name.
 // If multiple processes have the same filename, the first process
 // enumerated by this function is returned.

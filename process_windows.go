@@ -20,6 +20,12 @@ type ProcPlatAttribs struct {
 // Constant for full process access.
 const PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
 
+// GetProcessByPID returns the process with the given PID.
+func GetProcessByPID(PID int) (Process, error) {
+	panic("Not yet implemented")
+	return Process{}, nil
+}
+
 // getFileNameByPID returns a file name given a PID.
 func getFileNameByPID(pid uint32) string {
 	var fileName string = `<Unknown File>`
