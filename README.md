@@ -6,7 +6,7 @@ A package for memory editing in go.
 `go get github.com/Andoryuuta/kiwi`
 
 ## Usage
-```
+```Go
 package main
 
 import(
