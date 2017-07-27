@@ -9,36 +9,35 @@ A package for memory editing in go.
 ```Go
 package main
 
-import(
+import (
+	"log"
+
 	"github.com/Andoryuuta/kiwi"
-	"fmt"
 )
 
-func main(){
-	//The memory address of variable inside of target process.
+func main() {
+	// The memory address of variable inside of target process.
 	externVarAddr := uintptr(0x001A51E8)
 
-	//Find the process from the executable name.
+	// Find the process from the executable name.
 	proc, err := kiwi.GetProcessByFileName("example.exe")
-	if err != nil{
-		fmt.Println("Error while trying to find process.")
-		panic(err)
+	if err != nil {
+		log.Fatalln("Error while trying to find process.")
 	}
 
-	//Read from the target process
+	// Read from the target process.
 	externVar, err := proc.ReadUint32(externVarAddr)
-	if err != nil{
-		fmt.Println("Error while trying to read from target process.")
-		panic(err)
+	if err != nil {
+		log.Fatalln("Error while trying to read from target process.")
 	}
-	
-	//Output the variable we read.
-	fmt.Println("The value is", externVar)
-	
-	//Write a new value of 177357172 to the variable
-	err = proc.WriteUint32(externVarAddr, 177357172)
-	if err != nil{
-		panic(err)
+
+	// Output the variable we read.
+	log.Println("Read", externVar)
+
+	// Write a new value of 1000 to the variable
+	err = proc.WriteUint32(externVarAddr, 1000)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 ```
