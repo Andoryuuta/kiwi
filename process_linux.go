@@ -89,7 +89,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	dataBuf := make([]byte, dataSize)
 	n, err := mem.ReadAt(dataBuf, int64(addr))
 	if n != int(dataSize) {
-		return errors.New(fmt.Sprintf("Tried to read %d bytes, actually read %d bytes\n", size, n))
+		return errors.New(fmt.Sprintf("Tried to read %d bytes, actually read %d bytes\n", dataSize, n))
 	} else if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	// Write the data from buf into memory.
 	n, err := mem.WriteAt(*buf, int64(addr))
 	if n != int(dataSize) {
-		return errors.New((fmt.Sprintf("Tried to write %d bytes, actually wrote %d bytes\n", size, n)))
+		return errors.New((fmt.Sprintf("Tried to write %d bytes, actually wrote %d bytes\n", dataSize, n)))
 	} else if err != nil {
 		return err
 	}
