@@ -243,24 +243,3 @@ func TestReadFloat64(t *testing.T) {
 		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
 	}
 }
-
-func TestReadUintptr(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var org_var uintptr = 0x41414141
-
-	// Attempt to read using kiwi.
-	read_var, err := p.ReadUintptr(uintptr(unsafe.Pointer(&org_var)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
-	}
-}

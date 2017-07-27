@@ -22,7 +22,6 @@ func (p *Process) ReadUint32(addr uintptr) (v uint32, e error)   { e = p.read(ad
 func (p *Process) ReadUint64(addr uintptr) (v uint64, e error)   { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadFloat32(addr uintptr) (v float32, e error) { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadFloat64(addr uintptr) (v float64, e error) { e = p.read(addr, &v); return v, e }
-func (p *Process) ReadUintptr(addr uintptr) (v uintptr, e error) { e = p.read(addr, &v); return v, e }
 func (p *Process) ReadUint32Ptr(addr uintptr, offsets ...uintptr) (uint32, error) {
 	curPtr, err := p.ReadUint32(addr)
 	if err != nil {
@@ -49,4 +48,3 @@ func (p *Process) WriteUint32(addr uintptr, v uint32) (e error)   { return p.wri
 func (p *Process) WriteUint64(addr uintptr, v uint64) (e error)   { return p.write(addr, &v) }
 func (p *Process) WriteFloat32(addr uintptr, v float32) (e error) { return p.write(addr, &v) }
 func (p *Process) WriteFloat64(addr uintptr, v float64) (e error) { return p.write(addr, &v) }
-func (p *Process) WriteUintptr(addr uintptr, v uintptr) (e error) { return p.write(addr, &v) }
