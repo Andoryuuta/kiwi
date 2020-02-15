@@ -112,7 +112,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 		Cap:  int(dataSize),
 	}))
 	copy(*buf, dataBuf)
-
+	mem.Close()
 	return nil
 }
 
@@ -143,6 +143,6 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	} else if err != nil {
 		return err
 	}
-
+	mem.Close()
 	return nil
 }
