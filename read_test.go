@@ -274,3 +274,63 @@ func TestReadBytes(t *testing.T) {
 		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
+
+func TestReadNullTerminatedUTF8String(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "Hello, 世界"
+	utf8Data := append([]byte(expected), 0x00)
+
+	readStr, err := p.ReadNullTerminatedUTF8String(uintptr(unsafe.Pointer(&utf8Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+	}
+}
+
+func TestReadNullTerminatedUTF16String(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "0123"
+	utf16Data := []byte{0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00, 0x00}
+
+	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+	}
+}
+
+func TestReadNullTerminatedUTF16StringBigEndianBOM(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "0123"
+	utf16Data := []byte{0xFE, 0xFF, 0x00, 0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00}
+
+	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+	}
+}

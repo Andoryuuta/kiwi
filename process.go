@@ -2,6 +2,8 @@ package kiwi
 
 import (
 	"fmt"
+
+	"golang.org/x/text/encoding/unicode"
 )
 
 // Process holds general information about the process,
@@ -107,6 +109,104 @@ func (p *Process) ReadBytes(addr uintptr, size int) ([]byte, error) {
 	v := make([]byte, size)
 	e := p.read(addr, &v)
 	return v, e
+}
+
+// Takes a []byte and returns the index of the first 0 byte, or -1 if none.
+func cstrlen(data []byte) int {
+	for i := 0; i < len(data); i++ {
+		if data[i] == 0 {
+			return i
+		}
+	}
+	return -1
+}
+
+// ReadNullTerminatedUTF8String reads a null-termimated UTF8 string.
+func (p *Process) ReadNullTerminatedUTF8String(addr uintptr) (string, error) {
+	var outputBuffer []byte
+	readSize := 2048
+	for {
+		// Make a buffer to hold our temporary string data.
+		v := make([]byte, readSize)
+		err := p.read(addr+uintptr(len(outputBuffer)), &v)
+		if err != nil {
+			// Halve readSize if we got an error on read.
+			if readSize > 1 {
+				readSize /= 2
+				continue
+			}
+
+			return "", err
+		}
+
+		// Find the null index in our buffer.
+		idx := cstrlen(v)
+		if idx == -1 {
+			// No null-terminator in the buffer.
+			outputBuffer = append(outputBuffer, v...)
+		} else {
+			outputBuffer = v[:idx]
+			break
+		}
+	}
+	return string(outputBuffer), nil // Golang will decode as utf8.
+}
+
+// Takes a []uint16 and returns the index of the first 0, or -1 if none.
+func cwstrlen(data []uint16) int {
+	for i := 0; i < len(data); i++ {
+		if data[i] == 0 {
+			return i
+		}
+	}
+	return -1
+}
+
+// ReadNullTerminatedUTF16String reads a null-termimated UTF16 string.
+// Respects BOM, assumes little endianess if no BOM is present.
+func (p *Process) ReadNullTerminatedUTF16String(addr uintptr) (string, error) {
+	var outputBuffer []uint16
+	readSize := 2048
+	for {
+		// Make a buffer to hold our temporary string data.
+		v := make([]uint16, readSize)
+		err := p.read(addr+uintptr(len(outputBuffer)), &v)
+		if err != nil {
+			// Halve readSize if we got an error on read.
+			if readSize > 1 {
+				readSize /= 2
+				continue
+			}
+
+			return "", err
+		}
+
+		// Find the null index in our buffer.
+		idx := cwstrlen(v)
+		if idx == -1 {
+			// No null-terminator in the buffer.
+			outputBuffer = append(outputBuffer, v...)
+		} else {
+			outputBuffer = v[:idx]
+			break
+		}
+	}
+
+	// Convert the []uint16 -> []byte
+	byteBuf := make([]byte, len(outputBuffer)*2)
+	for i := 0; i < len(outputBuffer); i++ {
+		byteBuf[(i*2)+0] = byte((outputBuffer[i] >> 0) & 0xFF)
+		byteBuf[(i*2)+1] = byte((outputBuffer[i] >> 8) & 0xFF)
+	}
+
+	// Decode the UTF16 to UTF8
+	decoder := unicode.UTF16(unicode.LittleEndian, unicode.UseBOM).NewDecoder()
+	utf8Bytes, err := decoder.Bytes(byteBuf)
+	if err != nil {
+		return "", err
+	}
+
+	return string(utf8Bytes), nil
 }
 
 // WriteInt8 writes an int8.
