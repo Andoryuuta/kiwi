@@ -79,7 +79,8 @@ func GetProcessByFileName(fileName string) (Process, error) {
 		// Get the filename for this process
 		curFileName, err := getFileNameByPID(PIDs[i])
 		if err != nil {
-			return Process{}, fmt.Errorf("getFileNameByPID %v: %w", PIDs[i], err)
+			//return Process{}, fmt.Errorf("getFileNameByPID %v: %w", PIDs[i], err)
+			continue
 		}
 
 		// Check if it is the process being searched for.
