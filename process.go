@@ -1,7 +1,7 @@
 package kiwi
 
 import (
-	"errors"
+	"fmt"
 )
 
 // Process holds general information about the process,
@@ -89,13 +89,13 @@ func (p *Process) ReadFloat64(addr uintptr) (float64, error) {
 func (p *Process) ReadUint32Ptr(addr uintptr, offsets ...uintptr) (uint32, error) {
 	curPtr, err := p.ReadUint32(addr)
 	if err != nil {
-		return 0, errors.New("Error while trying to read from ptr base.")
+		return 0, fmt.Errorf("ReadUint32 0x%X: %w", addr, err)
 	}
 
 	for _, offset := range offsets {
 		curPtr, err = p.ReadUint32(uintptr(curPtr) + offset)
 		if err != nil {
-			return 0, errors.New("Error while trying to read from offset.")
+			return 0, fmt.Errorf("ReadUint32 0x%X: %w", addr, err)
 		}
 	}
 
