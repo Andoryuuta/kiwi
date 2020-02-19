@@ -9,43 +9,45 @@ import (
 	"unsafe"
 
 	"github.com/Andoryuuta/kiwi/w32"
+	"golang.org/x/sys/windows"
 )
 
-// Platform specific fields to be embedded into
-// the Process struct.
+// ProcPlatAttribs contains platform specific fields to be
+// embedded into the Process struct.
 type ProcPlatAttribs struct {
 	Handle w32.HANDLE
 }
 
-// Constant for full process access.
+// PROCESS_ALL_ACCESS is the windows constant for full process access.
 const PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
 
 // GetProcessByPID returns the process with the given PID.
-func GetProcessByPID(PID int) (Process, error) {
-	panic("Not yet implemented")
-	return Process{}, nil
+func GetProcessByPID(pid int) (Process, error) {
+	hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, uint32(pid))
+	if !ok {
+		return Process{}, fmt.Errorf("OpenProcess %v: %w", pid, windows.GetLastError())
+	}
+	return Process{ProcPlatAttribs: ProcPlatAttribs{Handle: hnd}, PID: uint64(pid)}, nil
 }
 
 // getFileNameByPID returns a file name given a PID.
-func getFileNameByPID(pid uint32) string {
-	var fileName string = `<Unknown File>`
-
+func getFileNameByPID(pid uint32) (string, error) {
 	// Open process.
 	hnd, ok := w32.OpenProcess(w32.PROCESS_QUERY_INFORMATION, false, pid)
 	if !ok {
-		return fileName
+		return "", fmt.Errorf("OpenProcess %v: %w", pid, windows.GetLastError())
 	}
 	defer w32.CloseHandle(hnd)
 
 	// Get file path.
 	path, ok := w32.GetProcessImageFileName(hnd)
 	if !ok {
-		return fileName
+		return "", fmt.Errorf("GetProcessImageFileName: %w", windows.GetLastError())
 	}
 
 	// Split file path to get file name.
-	_, fileName = filepath.Split(path)
-	return fileName
+	_, fileName := filepath.Split(path)
+	return fileName, nil
 }
 
 // GetProcessByFileName returns the process with the given file name.
@@ -53,33 +55,45 @@ func getFileNameByPID(pid uint32) string {
 // enumerated by this function is returned.
 func GetProcessByFileName(fileName string) (Process, error) {
 	// Read in process ids
-	PIDs := make([]uint32, 1024)
-	var bytesRead uint32 = 0
-	ok := w32.EnumProcesses(PIDs, uint32(len(PIDs)), &bytesRead)
-	if !ok {
-		panic("Error Enumerating processes.")
+	pidCount := 1024
+	var PIDs []uint32
+	var bytesRead uint32
+
+	// Get the process ids, increasing the PIDs buffer each time if there isn't enough space.
+	for i := 1; uint32(len(PIDs))*uint32(unsafe.Sizeof(uint32(0))) == bytesRead; i++ {
+		PIDs = make([]uint32, pidCount*i)
+		ok := w32.EnumProcesses(PIDs, uint32(len(PIDs))*uint32(unsafe.Sizeof(uint32(0))), &bytesRead)
+		if !ok {
+			return Process{}, fmt.Errorf("EnumProcesses: %w", windows.GetLastError())
+		}
 	}
 
 	// Loop over PIDs,
-	// Divide bytesRead by sizeof(uint32) to get how many processes there are.
+	// (Divide bytesRead by sizeof(uint32) to get how many processes there are).
 	for i := uint32(0); i < (bytesRead / 4); i++ {
 		// Skip over the system process with PID 0.
 		if PIDs[i] == 0 {
 			continue
 		}
 
+		// Get the filename for this process
+		curFileName, err := getFileNameByPID(PIDs[i])
+		if err != nil {
+			return Process{}, fmt.Errorf("getFileNameByPID %v: %w", PIDs[i], err)
+		}
+
 		// Check if it is the process being searched for.
-		if getFileNameByPID(PIDs[i]) == fileName {
+		if curFileName == fileName {
 			hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, PIDs[i])
 			if !ok {
-				return Process{}, errors.New(fmt.Sprintf("Error while opening process %d", PIDs[i]))
+				return Process{}, fmt.Errorf("OpenProcess %v: %w", PIDs[i], windows.GetLastError())
 			}
 			return Process{ProcPlatAttribs: ProcPlatAttribs{Handle: hnd}, PID: uint64(PIDs[i])}, nil
 		}
 	}
 
 	// Couldn't find process, return an error.
-	return Process{}, errors.New("Couldn't find process with name " + fileName)
+	return Process{}, errors.New("couldn't find process with name " + fileName)
 }
 
 // GetModuleBase takes a module name as an argument. (e.g. "kernel32.dll")
@@ -90,7 +104,7 @@ func GetProcessByFileName(fileName string) (Process, error) {
 func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
 	snap, ok := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPMODULE32|w32.TH32CS_SNAPALL|w32.TH32CS_SNAPMODULE, uint32(p.PID))
 	if !ok {
-		return 0, errors.New("Error trying on create toolhelp32 snapshot.")
+		return 0, fmt.Errorf("CreateToolhelp32Snapshot: %w", windows.GetLastError())
 	}
 	defer w32.CloseHandle(snap)
 
@@ -99,7 +113,7 @@ func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
 
 	// Get first module.
 	if !w32.Module32First(snap, &me32) {
-		return 0, errors.New("Error trying to get first module.")
+		return 0, fmt.Errorf("Module32First: %w", windows.GetLastError())
 	}
 
 	// Check first module.
@@ -116,7 +130,7 @@ func (p *Process) GetModuleBase(moduleName string) (uintptr, error) {
 	}
 
 	// Module couldn't be found.
-	return 0, errors.New("Couldn't find module.")
+	return 0, errors.New("couldn't find module")
 }
 
 // The platform specific read function.
@@ -131,7 +145,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 		dataSize,
 	)
 	if !ok || bytesRead != dataSize {
-		return errors.New("Error on reading process memory.")
+		return errors.New("error reading process memory")
 	}
 	return nil
 }
@@ -148,7 +162,7 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 		dataSize,
 	)
 	if !ok || bytesWritten != dataSize {
-		return errors.New("Error on writing process memory.")
+		return errors.New("error writing process memory")
 	}
 	return nil
 }
