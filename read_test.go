@@ -52,16 +52,16 @@ func TestReadUint8(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var uint8 = 243
+	var orgVar uint8 = 243
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadUint8(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadUint8(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -73,16 +73,16 @@ func TestReadUint16(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var uint16 = 65523
+	var orgVar uint16 = 65523
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadUint16(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadUint16(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -94,16 +94,16 @@ func TestReadUint32(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var uint32 = 4282681632
+	var orgVar uint32 = 4282681632
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadUint32(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadUint32(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -115,16 +115,16 @@ func TestReadUint64(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var uint64 = 18437214073702121416
+	var orgVar uint64 = 18437214073702121416
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadUint64(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadUint64(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -136,16 +136,16 @@ func TestReadInt8(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var int8 = 125
+	var orgVar int8 = 125
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadInt8(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadInt8(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -157,16 +157,16 @@ func TestReadInt16(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var int16 = 32524
+	var orgVar int16 = 32524
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadInt16(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadInt16(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -178,16 +178,16 @@ func TestReadInt32(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var int32 = 2121625523
+	var orgVar int32 = 2121625523
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadInt32(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadInt32(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -199,16 +199,16 @@ func TestReadInt64(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var int64 = 9217263856192656271
+	var orgVar int64 = 9217263856192656271
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadInt64(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadInt64(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -220,16 +220,16 @@ func TestReadFloat32(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var float32 = 2515123.0321
+	var orgVar float32 = 2515123.0321
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadFloat32(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadFloat32(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -241,16 +241,16 @@ func TestReadFloat64(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var float64 = 782658917272.1512
+	orgVar := 782658917272.1512
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadFloat64(uintptr(unsafe.Pointer(&org_var)))
+	readVar, err := p.ReadFloat64(uintptr(unsafe.Pointer(&orgVar)))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if read_var != org_var {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if readVar != orgVar {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
 	}
 }
 
@@ -262,15 +262,75 @@ func TestReadBytes(t *testing.T) {
 	}
 
 	// In memory variable to read from.
-	var org_var []byte = []byte{5, 4, 3, 2, 1}
+	orgVar := []byte{5, 4, 3, 2, 1}
 
 	// Attempt to read using kiwi.
-	read_var, err := p.ReadBytes(uintptr(unsafe.Pointer(&org_var[0])), len(org_var))
+	readVar, err := p.ReadBytes(uintptr(unsafe.Pointer(&orgVar[0])), len(orgVar))
 	if err != nil {
 		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
 	}
 
-	if !bytes.Equal(read_var, org_var) {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", org_var, read_var)
+	if !bytes.Equal(readVar, orgVar) {
+		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
+	}
+}
+
+func TestReadNullTerminatedUTF8String(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "Hello, 世界"
+	utf8Data := append([]byte(expected), 0x00)
+
+	readStr, err := p.ReadNullTerminatedUTF8String(uintptr(unsafe.Pointer(&utf8Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+	}
+}
+
+func TestReadNullTerminatedUTF16String(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "0123"
+	utf16Data := []byte{0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00, 0x00}
+
+	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+	}
+}
+
+func TestReadNullTerminatedUTF16StringBigEndianBOM(t *testing.T) {
+	// Get process using kiwi.
+	p, err := GetProcessByFileName(currentProcessName)
+	if err != nil {
+		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+	}
+
+	expected := "0123"
+	utf16Data := []byte{0xFE, 0xFF, 0x00, 0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00}
+
+	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
+	if err != nil {
+		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+	}
+
+	if readStr != expected {
+		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
 	}
 }
