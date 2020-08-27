@@ -18,12 +18,12 @@ type ProcPlatAttribs struct {
 	Handle w32.HANDLE
 }
 
-// PROCESS_ALL_ACCESS is the windows constant for full process access.
-const PROCESS_ALL_ACCESS = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
+// NeededProcessAccess is the combined win32 process open flags needed for kiwi functionality.
+const NeededProcessAccess = w32.PROCESS_VM_READ | w32.PROCESS_VM_WRITE | w32.PROCESS_VM_OPERATION | w32.PROCESS_QUERY_INFORMATION
 
 // GetProcessByPID returns the process with the given PID.
 func GetProcessByPID(pid int) (Process, error) {
-	hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, uint32(pid))
+	hnd, ok := w32.OpenProcess(NeededProcessAccess, false, uint32(pid))
 	if !ok {
 		return Process{}, fmt.Errorf("OpenProcess %v: %w", pid, windows.GetLastError())
 	}
@@ -85,7 +85,7 @@ func GetProcessByFileName(fileName string) (Process, error) {
 
 		// Check if it is the process being searched for.
 		if curFileName == fileName {
-			hnd, ok := w32.OpenProcess(PROCESS_ALL_ACCESS, false, PIDs[i])
+			hnd, ok := w32.OpenProcess(NeededProcessAccess, false, PIDs[i])
 			if !ok {
 				return Process{}, fmt.Errorf("OpenProcess %v: %w", PIDs[i], windows.GetLastError())
 			}
