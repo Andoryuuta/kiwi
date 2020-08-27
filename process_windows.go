@@ -143,8 +143,8 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 	dataSize := getDataSize(v)
 	bytesRead, ok := w32.ReadProcessMemory(
 		p.Handle,
-		unsafe.Pointer(addr),
-		unsafe.Pointer(dataAddr),
+		addr,
+		dataAddr,
 		dataSize,
 	)
 	if !ok || bytesRead != dataSize {
@@ -160,8 +160,8 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	dataSize := getDataSize(v)
 	bytesWritten, ok := w32.WriteProcessMemory(
 		p.Handle,
-		unsafe.Pointer(addr),
-		unsafe.Pointer(dataAddr),
+		addr,
+		dataAddr,
 		dataSize,
 	)
 	if !ok || bytesWritten != dataSize {

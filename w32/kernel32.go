@@ -22,13 +22,13 @@ var (
 	pCloseHandle = k32.NewProc("CloseHandle")
 )
 
-func ReadProcessMemory(hProcess HANDLE, lpBaseAddress, lpBuffer unsafe.Pointer, nSize uintptr) (uintptr, bool) {
+func ReadProcessMemory(hProcess HANDLE, lpBaseAddress, lpBuffer uintptr, nSize uintptr) (uintptr, bool) {
 	var bytesRead uintptr
 	ret, _, _ := pReadProcessMemory.Call(uintptr(hProcess), uintptr(lpBaseAddress), uintptr(lpBuffer), nSize, uintptr(unsafe.Pointer(&bytesRead)))
 	return bytesRead, ret != 0
 }
 
-func WriteProcessMemory(hProcess HANDLE, lpBaseAddress, lpBuffer unsafe.Pointer, nSize uintptr) (uintptr, bool) {
+func WriteProcessMemory(hProcess HANDLE, lpBaseAddress, lpBuffer uintptr, nSize uintptr) (uintptr, bool) {
 	var bytesWritten uintptr
 	ret, _, _ := pWriteProcessMemory.Call(uintptr(hProcess), uintptr(lpBaseAddress), uintptr(lpBuffer), nSize, uintptr(unsafe.Pointer(&bytesWritten)))
 	return bytesWritten, ret != 0
