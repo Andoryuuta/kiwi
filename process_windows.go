@@ -56,40 +56,42 @@ func getFileNameByPID(pid uint32) (string, error) {
 func GetProcessByFileName(fileName string) (Process, error) {
 	// Read in process ids
 	pidCount := 1024
-	var PIDs []uint32
+	var pids []uint32
 	var bytesRead uint32
 
-	// Get the process ids, increasing the PIDs buffer each time if there isn't enough space.
-	for i := 1; uint32(len(PIDs))*uint32(unsafe.Sizeof(uint32(0))) == bytesRead; i++ {
-		PIDs = make([]uint32, pidCount*i)
-		ok := w32.EnumProcesses(PIDs, uint32(len(PIDs))*uint32(unsafe.Sizeof(uint32(0))), &bytesRead)
+	uint32size := uint32(unsafe.Sizeof(uint32(0)))
+
+	// Get the process ids, increasing the pids buffer each time if there isn't enough space.
+	for i := 1; uint32(len(pids))*uint32size == bytesRead; i++ {
+		pids = make([]uint32, pidCount*i)
+		ok := w32.EnumProcesses(pids, uint32(len(pids))*uint32size, &bytesRead)
 		if !ok {
 			return Process{}, fmt.Errorf("EnumProcesses: %w", windows.GetLastError())
 		}
 	}
 
-	// Loop over PIDs,
+	// Loop over pids,
 	// (Divide bytesRead by sizeof(uint32) to get how many processes there are).
-	for i := uint32(0); i < (bytesRead / 4); i++ {
+	for i := uint32(0); i < (bytesRead / uint32size); i++ {
 		// Skip over the system process with PID 0.
-		if PIDs[i] == 0 {
+		if pids[i] == 0 {
 			continue
 		}
 
 		// Get the filename for this process
-		curFileName, err := getFileNameByPID(PIDs[i])
+		curFileName, err := getFileNameByPID(pids[i])
 		if err != nil {
-			//return Process{}, fmt.Errorf("getFileNameByPID %v: %w", PIDs[i], err)
+			//return Process{}, fmt.Errorf("getFileNameByPID %v: %w", pids[i], err)
 			continue
 		}
 
 		// Check if it is the process being searched for.
 		if curFileName == fileName {
-			hnd, ok := w32.OpenProcess(NeededProcessAccess, false, PIDs[i])
+			hnd, ok := w32.OpenProcess(NeededProcessAccess, false, pids[i])
 			if !ok {
-				return Process{}, fmt.Errorf("OpenProcess %v: %w", PIDs[i], windows.GetLastError())
+				return Process{}, fmt.Errorf("OpenProcess %v: %w", pids[i], windows.GetLastError())
 			}
-			return Process{ProcPlatAttribs: ProcPlatAttribs{Handle: hnd}, PID: uint64(PIDs[i])}, nil
+			return Process{ProcPlatAttribs: ProcPlatAttribs{Handle: hnd}, PID: uint64(pids[i])}, nil
 		}
 	}
 
