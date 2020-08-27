@@ -1,10 +1,10 @@
 package kiwi
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"unsafe"
 
@@ -44,293 +44,147 @@ func TestGetProcessByFileName(t *testing.T) {
 	}
 }
 
-func TestReadUint8(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+func TestRead(t *testing.T) {
+	tests := []struct {
+		name string
+
+		runTest func(p Process, t *testing.T) (error, interface{}, interface{})
+	}{
+		{
+			name: "uint8",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar uint8 = 243
+				readVar, err := p.ReadUint8(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "uint16",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar uint16 = 65523
+				readVar, err := p.ReadUint16(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "uint32",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar uint32 = 4282681632
+				readVar, err := p.ReadUint32(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "uint64",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar uint64 = 18437214073702121416
+				readVar, err := p.ReadUint64(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "int8",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar int8 = 125
+				readVar, err := p.ReadInt8(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "int16",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar int16 = 32524
+				readVar, err := p.ReadInt16(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "int32",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar int32 = 2121625523
+				readVar, err := p.ReadInt32(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "int64",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar int64 = 9217263856192656271
+				readVar, err := p.ReadInt64(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "float32",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar float32 = 2515123.0321
+				readVar, err := p.ReadFloat32(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "float64",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				var orgVar float64 = 782658917272.1512
+				readVar, err := p.ReadFloat64(uintptr(unsafe.Pointer(&orgVar)))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "bytes",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				orgVar := []byte{5, 4, 3, 2, 1}
+				readVar, err := p.ReadBytes(uintptr(unsafe.Pointer(&orgVar[0])), len(orgVar))
+				return err, orgVar, readVar
+			},
+		},
+		{
+			name: "null_terminated_utf8_string",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				expected := "Hello, 世界"
+				orgVar := append([]byte(expected), 0x00)
+				readVar, err := p.ReadNullTerminatedUTF8String(uintptr(unsafe.Pointer(&orgVar[0])))
+				return err, readVar, expected
+			},
+		},
+		{
+			name: "null_terminated_utf16_string",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				expected := "0123"
+				orgVar := []byte{0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00, 0x00}
+				readVar, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&orgVar[0])))
+				return err, readVar, expected
+			},
+		},
+		{
+			name: "null_terminated_utf16_string_bigendian_bom",
+			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
+				expected := "0123"
+				orgVar := []byte{0xFE, 0xFF, 0x00, 0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00}
+				readVar, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&orgVar[0])))
+				return err, readVar, expected
+			},
+		},
 	}
 
-	// In memory variable to read from.
-	var orgVar uint8 = 243
+	for _, tst := range tests {
+		t.Run(tst.name, func(t *testing.T) {
+			// Get process using kiwi.
+			p, err := GetProcessByFileName(currentProcessName)
+			if err != nil {
+				t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
+			}
 
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadUint8(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
+			// Run the test.
+			err, got, want := tst.runTest(p, t)
+			if err != nil {
+				t.Fatalf("Error trying to read. Error: %s\n", err.Error())
+			}
 
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadUint16(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar uint16 = 65523
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadUint16(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadUint32(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar uint32 = 4282681632
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadUint32(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadUint64(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar uint64 = 18437214073702121416
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadUint64(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadInt8(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar int8 = 125
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadInt8(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadInt16(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar int16 = 32524
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadInt16(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadInt32(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar int32 = 2121625523
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadInt32(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadInt64(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar int64 = 9217263856192656271
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadInt64(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadFloat32(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	var orgVar float32 = 2515123.0321
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadFloat32(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadFloat64(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	orgVar := 782658917272.1512
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadFloat64(uintptr(unsafe.Pointer(&orgVar)))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readVar != orgVar {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadBytes(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	// In memory variable to read from.
-	orgVar := []byte{5, 4, 3, 2, 1}
-
-	// Attempt to read using kiwi.
-	readVar, err := p.ReadBytes(uintptr(unsafe.Pointer(&orgVar[0])), len(orgVar))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if !bytes.Equal(readVar, orgVar) {
-		t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", orgVar, readVar)
-	}
-}
-
-func TestReadNullTerminatedUTF8String(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	expected := "Hello, 世界"
-	utf8Data := append([]byte(expected), 0x00)
-
-	readStr, err := p.ReadNullTerminatedUTF8String(uintptr(unsafe.Pointer(&utf8Data[0])))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readStr != expected {
-		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
-	}
-}
-
-func TestReadNullTerminatedUTF16String(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	expected := "0123"
-	utf16Data := []byte{0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00, 0x00}
-
-	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readStr != expected {
-		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
-	}
-}
-
-func TestReadNullTerminatedUTF16StringBigEndianBOM(t *testing.T) {
-	// Get process using kiwi.
-	p, err := GetProcessByFileName(currentProcessName)
-	if err != nil {
-		t.Fatalf("Error trying to open process \"%s\", Error: %s\n", currentProcessName, err.Error())
-	}
-
-	expected := "0123"
-	utf16Data := []byte{0xFE, 0xFF, 0x00, 0x30, 0x00, 0x31, 0x00, 0x32, 0x00, 0x33, 0x00, 0x00}
-
-	readStr, err := p.ReadNullTerminatedUTF16String(uintptr(unsafe.Pointer(&utf16Data[0])))
-	if err != nil {
-		t.Fatalf("Error trying to read. Error: %s\n", err.Error())
-	}
-
-	if readStr != expected {
-		t.Fatalf("Read values are not the same. Original: '%+q', Read: '%+q'\n", readStr, expected)
+			// Check the results.
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("Read values are not the same. Original: %v, Read: %v\n", got, want)
+			}
+		})
 	}
 }
