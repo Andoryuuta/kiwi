@@ -20,7 +20,8 @@ type ProcPlatAttribs struct {
 // GetProcessByPID returns the process with the given PID.
 func GetProcessByPID(PID int) (Process, error) {
 	// Try to open the folder to see if it exists and if we have access to it.
-	_, err := os.Open(fmt.Sprintf("/proc/%d", PID))
+	f, err := os.Open(fmt.Sprintf("/proc/%d", PID))
+	defer f.Close()
 	if err != nil {
 		return Process{}, errors.New(fmt.Sprintf("Error opening /proc/%d", PID))
 	}
@@ -34,6 +35,7 @@ func GetProcessByPID(PID int) (Process, error) {
 func GetProcessByFileName(fileName string) (Process, error) {
 	// Open the /proc *nix directory.
 	procDir, err := os.Open("/proc")
+	defer procDir.Close()
 	if err != nil {
 		fmt.Println(err)
 		return Process{}, errors.New("Error on opening /proc")
@@ -92,6 +94,7 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 
 	// Open the file mapped process memory.
 	mem, err := os.Open(fmt.Sprintf("/proc/%d/mem", p.PID))
+	defer mem.Close()
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
 	}
@@ -112,7 +115,6 @@ func (p *Process) read(addr uintptr, ptr interface{}) error {
 		Cap:  int(dataSize),
 	}))
 	copy(*buf, dataBuf)
-	mem.Close()
 	return nil
 }
 
@@ -125,6 +127,7 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 
 	// Open the file mapped process memory.
 	mem, err := os.OpenFile(fmt.Sprintf("/proc/%d/mem", p.PID), os.O_WRONLY, 0666)
+	defer mem.Close()
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error opening /proc/%d/mem. Are you root?", p.PID))
 	}
@@ -143,6 +146,5 @@ func (p *Process) write(addr uintptr, ptr interface{}) error {
 	} else if err != nil {
 		return err
 	}
-	mem.Close()
 	return nil
 }
