@@ -259,15 +259,6 @@ func TestWrite(t *testing.T) {
 			},
 		},
 		{
-			name: "int32",
-			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
-				var expected int32 = 2121625523
-				var outVar int32 = 0
-				err := p.WriteInt32(uintptr(unsafe.Pointer(&outVar)), expected)
-				return err, outVar, expected
-			},
-		},
-		{
 			name: "int64",
 			runTest: func(p Process, t *testing.T) (error, interface{}, interface{}) {
 				var expected int64 = 9217263856192656271
